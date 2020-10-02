@@ -70,7 +70,7 @@ add() {
 
 	printf '%s %s %s\n' "$service" "$username" "$pass" >> "$db"
 
-	enc
+	exit
 }
 
 edit() {
@@ -88,15 +88,12 @@ get() {
 		"Username")
 		grep -w "$servtrg" "$db" | awk '{print $2}' | xclip -selection clipboard
 		notify-send "💻 $servtrg's username copied to the clipboard." "Click to dismiss."
-		enc
 		;;
 		"Password")
 		grep -w "$servtrg" "$db" | awk '{print $3}' | xclip -selection clipboard
 		notify-send "💻 $servtrg's password copied to the clipboard." "Click to dismiss."
-		enc
 		;;
 		*)
-		enc
 		exit
 		;;
 		esac
