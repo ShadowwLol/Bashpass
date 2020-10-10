@@ -3,20 +3,13 @@
 # parameters - service username password
 # GPG encryption
 
-# ENCRYPT: 
-#gpg -e -r "$catkey" "$db"
-# remove the other file
-
-# DECRYPT:
-# gpg -d $db | tail -n +3 file.txt | awk '{print $1}' | sort | dmenu -i -p "Bashpass"
-
 # IF THE GPG KEY WAS MISWRITTEN DELETE THE .bashpass/key FILE AND RERUN THE SCRIPT
-# --trust-model always
 
 trap 'enc;exit' 0 1 2 3 15 19
 dbdir="$HOME/.bashpass"
 db="$dbdir/db"
 dbenc="$dbdir/db.gpg"
+EDITOR=subl
 
 enc() {
 	# ENCRYPT
@@ -32,10 +25,7 @@ dec() {
 
 
 add() {
-	if [ ! -f "$dbenc" ]
-	then
-		enc
-	fi
+	[ ! -f "$dbenc" ] && enc
 	service=$(printf "" | dmenu -p "Service:")
 	case $service in
 	"")
@@ -74,8 +64,7 @@ add() {
 }
 
 edit() {
-	dec
-	xdg-open "$db"
+	dec && $EDITOR "$db" && exit
 }
 
 
@@ -101,23 +90,18 @@ get() {
 }
 
 
-if [[ ! -d "$dbdir"  ]]; then
-	mkdir "$dbdir"
-	touch "$db"
-fi
+[ ! -d "$dbdir"  ] && mkdir "$dbdir"
 
-key="$dbdir/key"
+key="$dbdir/.key"
 
 if [[ ! -f "$key" ]] || [ ! -s "$key" ]
 then
-	touch "$key"
 	gpgmenu=$(printf "" | dmenu -p "GPG key:")
 
 	case $gpgmenu in
 	"")
 	notify-send "Error: invalid GPG key" "Click to dismiss."
-	rm -rf "$dbdir/"
-	exit
+	exit 1
 	;;
 	esac
 
@@ -127,10 +111,7 @@ fi
 
 catkey=`cat $key`
 
-if [[ -f "$db" && ! -f "$dbend" ]]
-then
-	enc
-fi
+[[ -f "$db" && ! -f "$dbenc" ]] && enc
 
 menu=$(printf "Add\nGet\nEdit" | dmenu -i -p "Bashpass")
 
