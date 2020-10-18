@@ -57,6 +57,9 @@ add() {
 	esac
 
 	dec
+	service=${service// /-}
+	username=${username// /-}
+	pass=${pass// /}
 
 	printf '%s %s %s\n' "$service" "$username" "$pass" >> "$db"
 
@@ -110,6 +113,8 @@ then
 	esac
 
 	printf "$gpgmenu" > "$key"
+	chmod +r "$key"
+	chmod -wx "$key"
 
 fi
 
