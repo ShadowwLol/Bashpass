@@ -35,9 +35,6 @@ add() {
 	[ -z $username ] && (notify-send "Error: invalid username" "Click to dismiss." ; exit 1)
 	pass=$(printf "" | dmenu -p "Password:")
 	[ -z $pass ] && (notify-send "Error: invalid password" "Click to dismiss." ; exit 1)
-	;;
-	esac
-
 	dec
 	service=${service// /-}
 	username=${username// /-}
@@ -51,7 +48,7 @@ add() {
 rem() {
 	dec
 	rmtrg=$(cat "$db" | awk '{print $1}' | sort | dmenu -i -p "Remove:")
-	[ ! -z "$rmtrg" ] && grep -v "$rmtrg" $db > "${db}2"; mv "${db}2" "$db"
+	[ ! -z "$rmtrg" ] && (grep -v "$rmtrg" $db > "${db}2"; mv "${db}2" "$db" && notify-send "Removed $rmtrg account" "Click to dismiss")
 }
 
 
@@ -84,7 +81,7 @@ get() {
 key="$dbdir/.key"
 catkey=`cat $key`
 
-if [[ ! -f "$key" ]] || [ ! -z "$catkey" ]
+if [[ ! -f "$key" ]] || [ ! -s "$key" ]
 then
 	gpgmenu=$(printf "" | dmenu -p "GPG key:")
 
