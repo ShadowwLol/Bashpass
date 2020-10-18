@@ -3,13 +3,10 @@
 # parameters - service username password
 # GPG encryption
 
-# IF THE GPG KEY WAS MISWRITTEN DELETE THE .bashpass/key FILE AND RERUN THE SCRIPT
-
 trap 'enc;exit' 0 1 2 3 15 19
 dbdir="$HOME/.bashpass"
 db="$dbdir/db"
 dbenc="$dbdir/db.gpg"
-EDITOR=subl
 
 enc() {
 	# ENCRYPT
