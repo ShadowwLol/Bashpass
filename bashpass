@@ -30,21 +30,21 @@ add() {
 	case $service in
 	"")
 	notify-send "Error: invalid service" "Click to dismiss."
-	exit
+	exit 1
 	;;
 	esac
-
+	dec
 	if grep -wq "$service" "$db"
 	then
 		notify-send "Error: Service name used" "Click to dismiss."
-		exit
+		exit 1
 	fi
-
+	enc
 	username=$(printf "" | dmenu -p "Username:")
 	case $username in
 	"")
 	notify-send "Error: invalid username" "Click to dismiss."
-	exit
+	exit 1
 	;;
 	esac
 
@@ -52,7 +52,7 @@ add() {
 	case $pass in
 	"")
 	notify-send "Error: invalid password" "Click to dismiss."
-	exit
+	exit 1
 	;;
 	esac
 
@@ -60,30 +60,34 @@ add() {
 
 	printf '%s %s %s\n' "$service" "$username" "$pass" >> "$db"
 
-	exit
+
 }
 
-edit() {
-	dec && $EDITOR "$db" && exit
+rem() {
+	dec
+	rmtrg=$(cat "$db" | awk '{print $1}' | sort | dmenu -i -p "Remove:")
+	[ ! -z "$rmtrg" ] && grep -v "$rmtrg" $db > "${db}2"; mv "${db}2" "$db"
 }
 
 
 get() {
 	dec
 	servtrg=$(cat "$db" | awk '{print $1}' | sort | dmenu -i -p "Bashpass")
-	if [ $servtrg != "" ]; then
+	if [ ! -z "$servtrg" ]; then
 		uspassmenu=$(printf "Username\nPassword" | dmenu -i -p "Bashpass")
 		case $uspassmenu in
 		"Username")
 		grep -w "$servtrg" "$db" | awk '{print $2}' | xclip -selection clipboard
 		notify-send "💻 $servtrg's username copied to the clipboard." "Click to dismiss."
+
 		;;
 		"Password")
 		grep -w "$servtrg" "$db" | awk '{print $3}' | xclip -selection clipboard
 		notify-send "💻 $servtrg's password copied to the clipboard." "Click to dismiss."
+
 		;;
 		*)
-		exit
+
 		;;
 		esac
 	fi
@@ -113,16 +117,16 @@ catkey=`cat $key`
 
 [[ -f "$db" && ! -f "$dbenc" ]] && enc
 
-menu=$(printf "Add\nGet\nEdit" | dmenu -i -p "Bashpass")
+menu=$(printf "Add\nRemove\nGet" | dmenu -i -p "Bashpass")
 
 case $menu in
 "Add")
 add ;;
 "Get")
 get ;;
-"Edit")
-edit ;;
+"Remove")
+rem ;;
 *)
-exit
+exit 1
 ;;
 esac
