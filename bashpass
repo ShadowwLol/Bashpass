@@ -24,32 +24,17 @@ dec() {
 add() {
 	[ ! -f "$dbenc" ] && enc
 	service=$(printf "" | dmenu -p "Service:")
-	case $service in
-	"")
-	notify-send "Error: invalid service" "Click to dismiss."
-	exit 1
-	;;
-	esac
+	[ -z $service ] && (notify-send "Error: invalid service" "Click to dismiss." ; exit 1)
 	dec
 	if grep -wq "$service" "$db"
 	then
-		notify-send "Error: Service name used" "Click to dismiss."
-		exit 1
+		notify-send "Error: Duplicated service" "Click to dismiss." ; exit 1
 	fi
 	enc
 	username=$(printf "" | dmenu -p "Username:")
-	case $username in
-	"")
-	notify-send "Error: invalid username" "Click to dismiss."
-	exit 1
-	;;
-	esac
-
+	[ -z $username ] && (notify-send "Error: invalid username" "Click to dismiss." ; exit 1)
 	pass=$(printf "" | dmenu -p "Password:")
-	case $pass in
-	"")
-	notify-send "Error: invalid password" "Click to dismiss."
-	exit 1
+	[ -z $pass ] && (notify-send "Error: invalid password" "Click to dismiss." ; exit 1)
 	;;
 	esac
 
@@ -97,8 +82,9 @@ get() {
 [ ! -d "$dbdir"  ] && mkdir "$dbdir"
 
 key="$dbdir/.key"
+catkey=`cat $key`
 
-if [[ ! -f "$key" ]] || [ ! -s "$key" ]
+if [[ ! -f "$key" ]] || [ ! -z "$catkey" ]
 then
 	gpgmenu=$(printf "" | dmenu -p "GPG key:")
 
@@ -114,8 +100,6 @@ then
 	chmod -wx "$key"
 
 fi
-
-catkey=`cat $key`
 
 [[ -f "$db" && ! -f "$dbenc" ]] && enc
 
